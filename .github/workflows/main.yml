@@ -1,0 +1,81 @@
+name: Release
+on:
+  schedule:
+
+    - cron:  '0 0 * * *'
+  push:
+    tags:
+      - '*'
+  release:
+  
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Publish Linux binaries
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Download and compile the latest iasl
+      run: VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+           echo ${VERSION};
+           curl "https://acpica.org/sites/acpica/files/acpica-unix-${VERSION}.tar_0.gz" -o ~/"acpica-unix-${VERSION}.tar.gz";
+           cd ~/;
+           tar xzf "acpica-unix-${VERSION}.tar.gz";
+           cd "acpica-unix-${VERSION}";
+           make clean;
+           make;
+           cp generate/unix/bin/iasl ~/.;
+           cp generate/unix/bin/acpiexec ~/.  
+           
+    - name: ZIP the ACPICA Linux
+      run: VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+           cd ~/;
+           ls;
+           zip -r "ACPICA_Linux_v${VERSION}.zip" iasl acpiexec;
+           echo "action_version="${VERSION} >> $GITHUB_ENV
+    
+    - name: Upload Linux to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: /home/runner/ACPICA_Linux_v${{ env.action_version }}.zip
+        asset_name: ACPICA_Linux_${{ env.action_version }}.zip
+        tag: ${{ env.action_version }}
+        overwrite: true
+        
+
+  build-macos:
+    name: Publish macOS binaries
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Download and compile the latest iasl/acpiexec for macOS
+      run: VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+           echo ${VERSION};
+           curl "https://acpica.org/sites/acpica/files/acpica-unix-${VERSION}.tar_0.gz" -o ~/"acpica-unix-${VERSION}.tar.gz";
+           cd ~/;
+           tar xzf "acpica-unix-${VERSION}.tar.gz";
+           cd "acpica-unix-${VERSION}";
+           make clean;
+           make;
+           cp generate/unix/bin/iasl ~/.;
+           cp generate/unix/bin/acpiexec ~/. ;
+           echo "action_version="${VERSION} >> $GITHUB_ENV
+           
+    - name: ZIP the ACPICA macOS Binaries
+      run: cd ~/;
+           zip -r "ACPICA_macOS_v${VERSION}.zip" iasl acpiexec;
+    
+    - name: Upload macOS to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: /Users/runner/ACPICA_macOS_v.zip
+        asset_name: ACPICA_macOS_${{ env.action_version }}.zip
+        tag: ${{ env.action_version }}
+        overwrite: true
