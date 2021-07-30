@@ -19,21 +19,25 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Download and compile the latest iasl
-      run: VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+      run: #VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+           #curl "https://acpica.org/sites/acpica/files/acpica-unix-${VERSION}.tar_0.gz" -o ~/"acpica-unix-${VERSION}.tar.gz";
+           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/releases |grep tags |grep zip | awk '{print $3}'| sed -e 's/["=]//g' | cut -d/ -f7 );
+           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip//g')";
            echo ${VERSION};
-           curl "https://acpica.org/sites/acpica/files/acpica-unix-${VERSION}.tar_0.gz" -o ~/"acpica-unix-${VERSION}.tar.gz";
            cd ~/;
-           tar xzf "acpica-unix-${VERSION}.tar.gz";
-           cd "acpica-unix-${VERSION}";
+           curl https://codeload.github.com/acpica/acpica/zip/"${VERSION}" -o "${VERSION}".zip;
+           unzip "${VERSION}.zip" -d  ~/"${VERSION}";
+           cd "${VERSION}/acpica-${VERSION}";
            make clean;
            make;
            cp generate/unix/bin/iasl ~/.;
            cp generate/unix/bin/acpiexec ~/.  
            
     - name: ZIP the ACPICA Linux
-      run: VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+      run: #VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/releases |grep tags |grep zip | awk '{print $3}'| sed -e 's/["=]//g' | cut -d/ -f7 );
+           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip//g')";
            cd ~/;
-           ls;
            zip -r "ACPICA_Linux_v${VERSION}.zip" iasl acpiexec;
            echo "action_version="${VERSION} >> $GITHUB_ENV
     
@@ -45,6 +49,7 @@ jobs:
         asset_name: ACPICA_Linux_${{ env.action_version }}.zip
         tag: ${{ env.action_version }}
         overwrite: true
+       # file_glob: true
         
 
   build-macos:
@@ -55,12 +60,14 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Download and compile the latest iasl/acpiexec for macOS
-      run: VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+      run: #VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
+           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/releases |grep tags |grep zip | awk '{print $3}'| sed -e 's/ *["=< >]//g' | cut -d/ -f7 );
+           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip//g')";
            echo ${VERSION};
-           curl "https://acpica.org/sites/acpica/files/acpica-unix-${VERSION}.tar_0.gz" -o ~/"acpica-unix-${VERSION}.tar.gz";
            cd ~/;
-           tar xzf "acpica-unix-${VERSION}.tar.gz";
-           cd "acpica-unix-${VERSION}";
+           curl https://codeload.github.com/acpica/acpica/zip/"${VERSION}" -o "${VERSION}".zip;
+           unzip "${VERSION}.zip" -d  ~/"${VERSION}";
+           cd "${VERSION}/acpica-${VERSION}";
            make clean;
            make;
            cp generate/unix/bin/iasl ~/.;
