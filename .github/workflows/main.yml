@@ -21,8 +21,8 @@ jobs:
     - name: Download and compile the latest iasl
       run: #VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
            #curl "https://acpica.org/sites/acpica/files/acpica-unix-${VERSION}.tar_0.gz" -o ~/"acpica-unix-${VERSION}.tar.gz";
-           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/releases |grep tags |grep zip | awk '{print $3}'| sed -e 's/["=]//g' | cut -d/ -f7 );
-           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip//g')";
+           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/tags | grep archive | cut -d/ -f7);
+           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip"//g')";
            echo ${VERSION};
            cd ~/;
            curl https://codeload.github.com/acpica/acpica/zip/"${VERSION}" -o "${VERSION}".zip;
@@ -35,8 +35,8 @@ jobs:
            
     - name: ZIP the ACPICA Linux
       run: #VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
-           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/releases |grep tags |grep zip | awk '{print $3}'| sed -e 's/["=]//g' | cut -d/ -f7 );
-           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip//g')";
+          REMOTE_VERSION=$(curl https://github.com/acpica/acpica/tags | grep archive | cut -d/ -f7);
+           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip"//g')";
            cd ~/;
            zip -r "ACPICA_Linux_v${VERSION}.zip" iasl acpiexec;
            echo "action_version="${VERSION} >> $GITHUB_ENV
@@ -61,8 +61,8 @@ jobs:
     
     - name: Download and compile the latest iasl/acpiexec for macOS
       run: #VERSION=$(curl https://acpica.org/downloads | grep "The current release of ACPICA is version" | sed -e 's/.*<strong>//g' | sed -e 's& </strong>.*&&g');
-           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/releases |grep tags |grep zip | awk '{print $3}'| sed -e 's/ *["=< >]//g' | cut -d/ -f7 );
-           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip//g')";
+           REMOTE_VERSION=$(curl https://github.com/acpica/acpica/tags | grep archive | cut -d/ -f7);
+           VERSION="$(echo ${REMOTE_VERSION}  | awk '{print $1}' | sed -e 's/.zip"//g')";
            echo ${VERSION};
            cd ~/;
            curl https://codeload.github.com/acpica/acpica/zip/"${VERSION}" -o "${VERSION}".zip;
